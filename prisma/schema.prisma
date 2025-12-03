@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id               String    @id @default(uuid())
+  email            String    @unique
+  googleId         String    @unique
+  displayName      String
+  avatarUrl        String?
+  currentWinStreak Int       @default(0)
+  currentLossStreak Int      @default(0)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  participations   Participation[]
+  matchesWon       Match[]   @relation("MatchWinner")
+  matchesAsPlayerA Match[]   @relation("MatchPlayerA")
+  matchesAsPlayerB Match[]   @relation("MatchPlayerB")
+}
+
+model Tournament {
+  id             String          @id @default(uuid())
+  name           String
+  location       String?
+  description    String?
+  startDate      DateTime
+  endDate        DateTime?
+  status         String          @default("UPCOMING")
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  matches        Match[]
+  participations Participation[]
+}
+
+model Match {
+  id            String     @id @default(uuid())
+  tournament    Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  tournamentId  String
+  playerA       User       @relation("MatchPlayerA", fields: [playerAId], references: [id])
+  playerAId     String
+  playerB       User       @relation("MatchPlayerB", fields: [playerBId], references: [id])
+  playerBId     String
+  winner        User?      @relation("MatchWinner", fields: [winnerId], references: [id])
+  winnerId      String?
+  tableNumber   Int?
+  scheduledAt   DateTime?
+  completedAt   DateTime?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+model Participation {
+  id           String     @id @default(uuid())
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  tournamentId String
+  seed         Int?
+  wins         Int        @default(0)
+  losses       Int        @default(0)
+  @@unique([userId, tournamentId], map: "UNIQUE_USER_TOURNAMENT")
+}
+
