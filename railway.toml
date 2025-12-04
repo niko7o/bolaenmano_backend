@@ -1,6 +1,9 @@
 [build]
 builder = "NIXPACKS"
 
+[build.nixpacksPlan.phases.setup]
+nixPkgs = ["nodejs_22"]
+
 [deploy]
 buildCommand = "npm run build && npx prisma generate"
 startCommand = "npm run start"

@@ -16,6 +16,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "engines": {
+    "node": ">=20.19.0"
+  },
   "dependencies": {
     "@libsql/client": "^0.14.0",
     "@prisma/adapter-libsql": "^7.0.0",
