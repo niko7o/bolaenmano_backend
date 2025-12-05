@@ -4,10 +4,10 @@ import { env } from "../config/env";
 const client = new OAuth2Client(env.GOOGLE_CLIENT_ID);
 
 // Accept tokens from both Web and iOS clients
-const VALID_AUDIENCES = [
-  env.GOOGLE_CLIENT_ID, // Web Client ID
-  env.GOOGLE_IOS_CLIENT_ID, // iOS Client ID
-].filter(Boolean);
+const VALID_AUDIENCES: string[] = [
+  env.GOOGLE_CLIENT_ID,
+  env.GOOGLE_IOS_CLIENT_ID,
+].filter((id): id is string => Boolean(id));
 
 export const verifyGoogleToken = async (idToken: string) => {
   const ticket = await client.verifyIdToken({

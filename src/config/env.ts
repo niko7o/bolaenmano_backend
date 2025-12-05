@@ -8,7 +8,7 @@ const envSchema = z.object({
   DATABASE_URL: z.string().min(1),
   GOOGLE_CLIENT_ID: z.string().min(1),
   GOOGLE_CLIENT_SECRET: z.string().min(1),
-  GOOGLE_IOS_CLIENT_ID: z.string().optional(), // iOS OAuth Client ID
+  GOOGLE_IOS_CLIENT_ID: z.string(), // iOS OAuth Client ID
   JWT_SECRET: z.string().min(10),
   ADMIN_USERS: z.string().default(""),
 });
