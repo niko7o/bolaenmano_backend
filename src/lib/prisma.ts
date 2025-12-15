@@ -1,19 +1,23 @@
 import { PrismaClient } from "@prisma/client";
-import { PrismaLibSql } from "@prisma/adapter-libsql";
+import { PrismaPg } from "@prisma/adapter-pg";
+import pg from "pg";
 import { env } from "../config/env";
 
 const globalForPrisma = globalThis as unknown as {
   prisma?: PrismaClient;
 };
 
-const adapter = new PrismaLibSql({
-  url: env.DATABASE_URL,
+const { Pool } = pg;
+
+const pool = new Pool({
+  connectionString: env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
 });
 
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
-    adapter,
+    adapter: new PrismaPg(pool),
     log: ["query", "info", "warn", "error"],
   });
 

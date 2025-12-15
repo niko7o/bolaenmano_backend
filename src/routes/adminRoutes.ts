@@ -274,7 +274,7 @@ router.post("/matches", async (req, res) => {
       tournamentId: parsed.data.tournamentId,
       playerAId: parsed.data.playerAId,
       playerBId: parsed.data.playerBId,
-      scheduledAt: parsed.data.scheduledAt,
+      scheduledAt: parsed.data.scheduledAt?.toISOString() ?? null,
       tableNumber: parsed.data.tableNumber,
     });
 
@@ -304,7 +304,11 @@ router.patch("/matches/:matchId", async (req, res) => {
   }
 
   try {
-    const match = await updateMatch(matchId, parsed.data);
+    const match = await updateMatch(matchId, {
+      ...parsed.data,
+      scheduledAt: parsed.data.scheduledAt?.toISOString() ?? null,
+      completedAt: parsed.data.completedAt?.toISOString() ?? null,
+    });
     return res.json(match);
   } catch (error) {
     console.error("Error updating match:", error);
