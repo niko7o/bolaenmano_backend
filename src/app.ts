@@ -5,6 +5,7 @@ import { authRoutes } from "./routes/authRoutes";
 import { tournamentRoutes } from "./routes/tournamentRoutes";
 import { userRoutes } from "./routes/userRoutes";
 import { matchRoutes } from "./routes/matchRoutes";
+import { adminRoutes } from "./routes/adminRoutes";
 
 export const buildApp = () => {
   const app = express();
@@ -23,6 +24,7 @@ export const buildApp = () => {
   app.use("/tournaments", tournamentRoutes);
   app.use("/users", userRoutes);
   app.use("/matches", matchRoutes);
+  app.use("/admin", adminRoutes);
 
   app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
     console.error(err);
