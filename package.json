@@ -23,6 +23,7 @@
     "@libsql/client": "^0.14.0",
     "@prisma/adapter-libsql": "^7.0.0",
     "@prisma/client": "^7.0.0",
+    "@sentry/node": "^10.30.0",
     "better-sqlite3": "^12.5.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",

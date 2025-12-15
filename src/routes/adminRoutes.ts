@@ -1,4 +1,5 @@
 import { Router } from "express";
+import * as Sentry from "@sentry/node";
 import { z } from "zod";
 import { requireAuth, requireAdmin } from "../middleware/auth";
 import { prisma } from "../lib/prisma";
@@ -6,6 +7,17 @@ import { createMatch, updateMatch } from "../services/matchService";
 import { isAdminEmail } from "../lib/admin";
 
 const router = Router();
+
+const captureRouteException = (
+  error: unknown,
+  route: string,
+  extra: Record<string, unknown> = {},
+) => {
+  Sentry.captureException(error, {
+    tags: { route },
+    extra,
+  });
+};
 
 // All admin routes require authentication + admin status
 router.use(requireAuth, requireAdmin);
@@ -55,6 +67,7 @@ router.get("/tournaments", async (_req, res) => {
     return res.json(tournaments);
   } catch (error) {
     console.error("Error fetching tournaments:", error);
+    captureRouteException(error, "admin:tournaments:list");
     return res.status(500).json({ message: "Failed to fetch tournaments" });
   }
 });
@@ -106,6 +119,9 @@ router.post("/tournaments", async (req, res) => {
     return res.status(201).json(tournament);
   } catch (error) {
     console.error("Error creating tournament:", error);
+    captureRouteException(error, "admin:tournaments:create", {
+      payload: parsed.data,
+    });
     return res.status(500).json({ message: "Failed to create tournament" });
   }
 });
@@ -160,6 +176,10 @@ router.patch("/tournaments/:tournamentId", async (req, res) => {
     return res.json(tournament);
   } catch (error) {
     console.error("Error updating tournament:", error);
+    captureRouteException(error, "admin:tournaments:update", {
+      tournamentId,
+      payload: parsed.data,
+    });
     return res.status(500).json({ message: "Failed to update tournament" });
   }
 });
@@ -194,6 +214,10 @@ router.post("/tournaments/:tournamentId/players", async (req, res) => {
     return res.status(201).json({ message: "Player added to tournament" });
   } catch (error) {
     console.error("Error adding player to tournament:", error);
+    captureRouteException(error, "admin:tournaments:players:add", {
+      tournamentId,
+      payload: parsed.data,
+    });
     return res.status(500).json({ message: "Failed to add player to tournament" });
   }
 });
@@ -212,6 +236,10 @@ router.delete("/tournaments/:tournamentId/players/:userId", async (req, res) => 
     return res.json({ message: "Player removed from tournament" });
   } catch (error) {
     console.error("Error removing player from tournament:", error);
+    captureRouteException(error, "admin:tournaments:players:remove", {
+      tournamentId,
+      userId,
+    });
     return res.status(500).json({ message: "Failed to remove player from tournament" });
   }
 });
