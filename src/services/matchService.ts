@@ -112,6 +112,7 @@ export const updateMatch = (matchId: string, payload: UpdateMatchPayload) => {
 
   if (payload.scheduledAt !== undefined) {
     data.scheduledAt = toDate(payload.scheduledAt);
+    data.reminderSentAt = null;
   }
 
   if (payload.completedAt !== undefined) {

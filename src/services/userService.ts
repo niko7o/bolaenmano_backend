@@ -82,3 +82,16 @@ export const getUserProfileWithMatches = async (userId: string) => {
   return { ...user, matches };
 };
 
+export const saveExpoPushToken = async (userId: string, expoPushToken: string) => {
+  // Ensure token is unique across users
+  await prisma.user.updateMany({
+    where: { expoPushToken },
+    data: { expoPushToken: null },
+  });
+
+  return prisma.user.update({
+    where: { id: userId },
+    data: { expoPushToken },
+  });
+};
+
