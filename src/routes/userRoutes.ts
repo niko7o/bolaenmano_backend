@@ -28,7 +28,7 @@ router.post("/me/push-token", requireAuth, async (req: AuthedRequest, res) => {
   if (!parsed.success) {
     return res
       .status(400)
-      .json({ message: "Invalid push token", issues: parsed.error.errors });
+      .json({ message: "Invalid push token", issues: parsed.error.issues });
   }
 
   try {

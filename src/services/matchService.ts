@@ -12,17 +12,17 @@ export type CreateMatchPayload = {
   tournamentId: string;
   playerAId: string;
   playerBId: string;
-  tableNumber?: number | null;
-  scheduledAt?: string | null;
+  tableNumber?: number | null | undefined;
+  scheduledAt?: string | null | undefined;
 };
 
 export type UpdateMatchPayload = {
   playerAId?: string;
   playerBId?: string;
-  tableNumber?: number | null;
-  scheduledAt?: string | null;
-  completedAt?: string | null;
-  winnerId?: string | null;
+  tableNumber?: number | null | undefined;
+  scheduledAt?: string | null | undefined;
+  completedAt?: string | null | undefined;
+  winnerId?: string | null | undefined;
 };
 
 const matchInclude = {
