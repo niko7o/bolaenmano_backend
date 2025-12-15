@@ -43,3 +43,42 @@ export const getUserById = (userId: string) =>
     where: { id: userId },
   });
 
+const matchHistoryInclude = {
+  playerA: true,
+  playerB: true,
+  winner: true,
+  tournament: true,
+};
+
+export const getUserProfileWithMatches = async (userId: string) => {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: {
+      participations: {
+        include: {
+          tournament: true,
+        },
+      },
+    },
+  });
+
+  if (!user) {
+    return null;
+  }
+
+  const matches = await prisma.match.findMany({
+    where: {
+      completedAt: { not: null },
+      OR: [{ playerAId: userId }, { playerBId: userId }],
+    },
+    include: matchHistoryInclude,
+    orderBy: [
+      { completedAt: "desc" as const },
+      { scheduledAt: "desc" as const },
+      { createdAt: "desc" as const },
+    ],
+  });
+
+  return { ...user, matches };
+};
+
