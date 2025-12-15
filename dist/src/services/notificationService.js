@@ -1,0 +1,94 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.startReminderScheduler = exports.sendUpcomingMatchReminders = void 0;
+const prisma_1 = require("../lib/prisma");
+const EXPO_PUSH_URL = "https://exp.host/--/api/v2/push/send";
+const REMINDER_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+const isExpoPushToken = (token) => !!token && (token.startsWith("ExponentPushToken") || token.startsWith("ExpoPushToken"));
+const postExpoMessages = async (messages) => {
+    if (!messages.length) {
+        return;
+    }
+    try {
+        const response = await fetch(EXPO_PUSH_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(messages),
+        });
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error("[notifications] Failed to send Expo push", response.status, errorText);
+        }
+    }
+    catch (error) {
+        console.error("[notifications] Error sending Expo push", error);
+    }
+};
+const sendUpcomingMatchReminders = async () => {
+    const now = new Date();
+    const oneHourFromNow = new Date(now.getTime() + REMINDER_WINDOW_MS);
+    const matches = await prisma_1.prisma.match.findMany({
+        where: {
+            completedAt: null,
+            reminderSentAt: null,
+            scheduledAt: {
+                gte: now,
+                lte: oneHourFromNow,
+            },
+        },
+        include: {
+            playerA: true,
+            playerB: true,
+            tournament: true,
+        },
+        orderBy: {
+            scheduledAt: "asc",
+        },
+    });
+    const notifications = [];
+    matches.forEach((match) => {
+        const playerPairs = [
+            { target: match.playerA, opponent: match.playerB },
+            { target: match.playerB, opponent: match.playerA },
+        ];
+        playerPairs.forEach(({ target, opponent }) => {
+            if (!isExpoPushToken(target.expoPushToken)) {
+                return;
+            }
+            notifications.push({
+                to: target.expoPushToken,
+                title: "Match coming up",
+                body: `Match coming up in 1 hour against ${opponent.displayName}`,
+                sound: "default",
+                data: {
+                    matchId: match.id,
+                    tournamentId: match.tournamentId,
+                },
+            });
+        });
+    });
+    if (notifications.length) {
+        await postExpoMessages(notifications);
+        await prisma_1.prisma.match.updateMany({
+            where: { id: { in: matches.map((match) => match.id) } },
+            data: { reminderSentAt: new Date() },
+        });
+    }
+    return { inspectedMatches: matches.length, sentNotifications: notifications.length };
+};
+exports.sendUpcomingMatchReminders = sendUpcomingMatchReminders;
+const startReminderScheduler = (intervalMs = 60_000) => {
+    const tick = async () => {
+        try {
+            await (0, exports.sendUpcomingMatchReminders)();
+        }
+        catch (error) {
+            console.error("[notifications] Failed reminder tick", error);
+        }
+    };
+    // run immediately on boot, then interval
+    void tick();
+    return setInterval(tick, intervalMs);
+};
+exports.startReminderScheduler = startReminderScheduler;
+//# sourceMappingURL=notificationService.js.map

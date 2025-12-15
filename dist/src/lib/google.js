@@ -4,10 +4,15 @@ exports.verifyGoogleToken = void 0;
 const google_auth_library_1 = require("google-auth-library");
 const env_1 = require("../config/env");
 const client = new google_auth_library_1.OAuth2Client(env_1.env.GOOGLE_CLIENT_ID);
+// Accept tokens from both Web and iOS clients
+const VALID_AUDIENCES = [
+    env_1.env.GOOGLE_CLIENT_ID,
+    env_1.env.GOOGLE_IOS_CLIENT_ID,
+].filter((id) => Boolean(id));
 const verifyGoogleToken = async (idToken) => {
     const ticket = await client.verifyIdToken({
         idToken,
-        audience: env_1.env.GOOGLE_CLIENT_ID,
+        audience: VALID_AUDIENCES,
     });
     const payload = ticket.getPayload();
     if (!payload?.email || !payload.sub) {

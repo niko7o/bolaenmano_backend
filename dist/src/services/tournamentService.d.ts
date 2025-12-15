@@ -6,6 +6,7 @@ export declare const getCurrentTournament: () => import(".prisma/client").Prisma
             googleId: string;
             displayName: string;
             avatarUrl: string | null;
+            expoPushToken: string | null;
             currentWinStreak: number;
             currentLossStreak: number;
             createdAt: Date;
@@ -17,6 +18,7 @@ export declare const getCurrentTournament: () => import(".prisma/client").Prisma
             googleId: string;
             displayName: string;
             avatarUrl: string | null;
+            expoPushToken: string | null;
             currentWinStreak: number;
             currentLossStreak: number;
             createdAt: Date;
@@ -28,6 +30,7 @@ export declare const getCurrentTournament: () => import(".prisma/client").Prisma
             googleId: string;
             displayName: string;
             avatarUrl: string | null;
+            expoPushToken: string | null;
             currentWinStreak: number;
             currentLossStreak: number;
             createdAt: Date;
@@ -44,6 +47,7 @@ export declare const getCurrentTournament: () => import(".prisma/client").Prisma
         tableNumber: number | null;
         scheduledAt: Date | null;
         completedAt: Date | null;
+        reminderSentAt: Date | null;
     })[];
     participations: ({
         user: {
@@ -52,6 +56,7 @@ export declare const getCurrentTournament: () => import(".prisma/client").Prisma
             googleId: string;
             displayName: string;
             avatarUrl: string | null;
+            expoPushToken: string | null;
             currentWinStreak: number;
             currentLossStreak: number;
             createdAt: Date;
@@ -84,6 +89,7 @@ export declare const getTournamentHistory: () => import(".prisma/client").Prisma
             googleId: string;
             displayName: string;
             avatarUrl: string | null;
+            expoPushToken: string | null;
             currentWinStreak: number;
             currentLossStreak: number;
             createdAt: Date;
@@ -116,6 +122,7 @@ export declare const getTournamentById: (tournamentId: string) => import(".prism
             googleId: string;
             displayName: string;
             avatarUrl: string | null;
+            expoPushToken: string | null;
             currentWinStreak: number;
             currentLossStreak: number;
             createdAt: Date;
@@ -127,6 +134,7 @@ export declare const getTournamentById: (tournamentId: string) => import(".prism
             googleId: string;
             displayName: string;
             avatarUrl: string | null;
+            expoPushToken: string | null;
             currentWinStreak: number;
             currentLossStreak: number;
             createdAt: Date;
@@ -138,6 +146,7 @@ export declare const getTournamentById: (tournamentId: string) => import(".prism
             googleId: string;
             displayName: string;
             avatarUrl: string | null;
+            expoPushToken: string | null;
             currentWinStreak: number;
             currentLossStreak: number;
             createdAt: Date;
@@ -154,6 +163,7 @@ export declare const getTournamentById: (tournamentId: string) => import(".prism
         tableNumber: number | null;
         scheduledAt: Date | null;
         completedAt: Date | null;
+        reminderSentAt: Date | null;
     })[];
     participations: ({
         user: {
@@ -162,6 +172,7 @@ export declare const getTournamentById: (tournamentId: string) => import(".prism
             googleId: string;
             displayName: string;
             avatarUrl: string | null;
+            expoPushToken: string | null;
             currentWinStreak: number;
             currentLossStreak: number;
             createdAt: Date;

@@ -74,6 +74,7 @@ const updateMatch = (matchId, payload) => {
     }
     if (payload.scheduledAt !== undefined) {
         data.scheduledAt = toDate(payload.scheduledAt);
+        data.reminderSentAt = null;
     }
     if (payload.completedAt !== undefined) {
         data.completedAt = toDate(payload.completedAt);

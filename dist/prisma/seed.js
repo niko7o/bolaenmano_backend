@@ -1,13 +1,21 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const client_1 = require("@prisma/client");
-const adapter_libsql_1 = require("@prisma/adapter-libsql");
+const adapter_pg_1 = require("@prisma/adapter-pg");
+const pg_1 = __importDefault(require("pg"));
 const dotenv_1 = require("dotenv");
 (0, dotenv_1.config)();
-const adapter = new adapter_libsql_1.PrismaLibSql({
-    url: process.env.DATABASE_URL ?? "file:./dev.db",
+const { Pool } = pg_1.default;
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false },
 });
-const prisma = new client_1.PrismaClient({ adapter });
+const prisma = new client_1.PrismaClient({
+    adapter: new adapter_pg_1.PrismaPg(pool),
+});
 const players = [
     {
         googleId: "demo-google-id-1",

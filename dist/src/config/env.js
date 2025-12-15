@@ -9,8 +9,11 @@ const envSchema = zod_1.z.object({
     DATABASE_URL: zod_1.z.string().min(1),
     GOOGLE_CLIENT_ID: zod_1.z.string().min(1),
     GOOGLE_CLIENT_SECRET: zod_1.z.string().min(1),
+    GOOGLE_IOS_CLIENT_ID: zod_1.z.string(), // iOS OAuth Client ID
     JWT_SECRET: zod_1.z.string().min(10),
     ADMIN_USERS: zod_1.z.string().default(""),
+    SENTRY_DSN: zod_1.z.string().optional(),
+    SENTRY_TRACES_SAMPLE_RATE: zod_1.z.coerce.number().min(0).max(1).default(0),
 });
 const parsed = envSchema.safeParse(process.env);
 if (!parsed.success) {
