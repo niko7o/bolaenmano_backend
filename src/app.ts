@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import { env } from "./config/env";
+import * as Sentry from "@sentry/node";
 
 import { authRoutes } from "./routes/authRoutes";
 import { tournamentRoutes } from "./routes/tournamentRoutes";
@@ -8,19 +9,8 @@ import { userRoutes } from "./routes/userRoutes";
 import { matchRoutes } from "./routes/matchRoutes";
 import { adminRoutes } from "./routes/adminRoutes";
 
-import * as Sentry from "@sentry/node";
-
 export const buildApp = () => {
   const app = express();
-
-  Sentry.init({
-    dsn: env.SENTRY_DSN ?? "",
-    enabled: Boolean(env.SENTRY_DSN),
-    enableLogs: true,
-    sendDefaultPii: true,
-    tracesSampleRate: env.SENTRY_TRACES_SAMPLE_RATE,
-    integrations: [Sentry.expressIntegration()],
-  });
 
   app.use(
     cors({
