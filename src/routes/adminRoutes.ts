@@ -72,12 +72,17 @@ router.get("/tournaments", async (_req, res) => {
   }
 });
 
+const dateSchema = z
+  .coerce
+  .date()
+  .refine((value) => !Number.isNaN(value.getTime()), { message: "Invalid date" });
+
 const createTournamentSchema = z.object({
   name: z.string().min(1),
   location: z.string().optional(),
   description: z.string().optional(),
-  startDate: z.string().datetime(),
-  endDate: z.string().datetime().optional(),
+  startDate: dateSchema,
+  endDate: dateSchema.optional(),
 });
 
 router.post("/tournaments", async (req, res) => {
@@ -130,8 +135,8 @@ const updateTournamentSchema = z.object({
   name: z.string().min(1).optional(),
   location: z.string().optional(),
   description: z.string().optional(),
-  startDate: z.string().datetime().optional(),
-  endDate: z.string().datetime().optional(),
+  startDate: dateSchema.optional(),
+  endDate: dateSchema.optional(),
   status: z.enum(["UPCOMING", "ACTIVE", "COMPLETED"]).optional(),
 });
 
@@ -250,7 +255,7 @@ const createMatchSchema = z.object({
   tournamentId: z.string().uuid(),
   playerAId: z.string().uuid(),
   playerBId: z.string().uuid(),
-  scheduledAt: z.string().datetime().optional(),
+  scheduledAt: dateSchema.optional(),
   tableNumber: z.number().optional(),
 });
 
@@ -282,9 +287,9 @@ router.post("/matches", async (req, res) => {
 
 const updateMatchSchema = z.object({
   winnerId: z.string().uuid().nullable().optional(),
-  scheduledAt: z.string().datetime().nullable().optional(),
+  scheduledAt: dateSchema.nullable().optional(),
   tableNumber: z.number().nullable().optional(),
-  completedAt: z.string().datetime().nullable().optional(),
+  completedAt: dateSchema.nullable().optional(),
 });
 
 router.patch("/matches/:matchId", async (req, res) => {
