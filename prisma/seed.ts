@@ -17,6 +17,7 @@ const prisma = new PrismaClient({
 });
 
 const players = [
+  // Original 8 players
   {
     googleId: "demo-google-id-1",
     email: "daniela@gmail.com",
@@ -65,6 +66,55 @@ const players = [
     displayName: "Miguel Torres",
     avatarUrl: "https://i.pravatar.cc/150?img=11",
   },
+  // New 8 players for 16-player tournament
+  {
+    googleId: "demo-google-id-9",
+    email: "sofia@gmail.com",
+    displayName: "Sofia Garcia",
+    avatarUrl: "https://i.pravatar.cc/150?img=24",
+  },
+  {
+    googleId: "demo-google-id-10",
+    email: "diego@gmail.com",
+    displayName: "Diego Fernandez",
+    avatarUrl: "https://i.pravatar.cc/150?img=33",
+  },
+  {
+    googleId: "demo-google-id-11",
+    email: "isabella@gmail.com",
+    displayName: "Isabella Martinez",
+    avatarUrl: "https://i.pravatar.cc/150?img=25",
+  },
+  {
+    googleId: "demo-google-id-12",
+    email: "lucas@gmail.com",
+    displayName: "Lucas Herrera",
+    avatarUrl: "https://i.pravatar.cc/150?img=51",
+  },
+  {
+    googleId: "demo-google-id-13",
+    email: "valentina@gmail.com",
+    displayName: "Valentina Lopez",
+    avatarUrl: "https://i.pravatar.cc/150?img=26",
+  },
+  {
+    googleId: "demo-google-id-14",
+    email: "mateo@gmail.com",
+    displayName: "Mateo Silva",
+    avatarUrl: "https://i.pravatar.cc/150?img=52",
+  },
+  {
+    googleId: "demo-google-id-15",
+    email: "camila@gmail.com",
+    displayName: "Camila Moreno",
+    avatarUrl: "https://i.pravatar.cc/150?img=27",
+  },
+  {
+    googleId: "demo-google-id-16",
+    email: "andres@gmail.com",
+    displayName: "Andres Ruiz",
+    avatarUrl: "https://i.pravatar.cc/150?img=53",
+  },
 ];
 
 const main = async () => {
@@ -80,7 +130,10 @@ const main = async () => {
   }
 
   // Get player references for easier access
-  const [daniela, nikoto, benjamin, antoine, maria, carlos, elena, miguel] = seededPlayers;
+  const [
+    daniela, nikoto, benjamin, antoine, maria, carlos, elena, miguel,
+    sofia, diego, isabella, lucas, valentina, mateo, camila, andres
+  ] = seededPlayers;
 
   // Tournament 1: UPCOMING with 4 participants
   await prisma.tournament.create({
@@ -88,8 +141,8 @@ const main = async () => {
       name: "Winter Open Doubles",
       location: "Bola En Mano Bar",
       description: "Friendly 8-ball bracket using race-to-3 racks.",
-      startDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 1 week from now
-      endDate: new Date(Date.now() + 8 * 24 * 60 * 60 * 1000), // 1 week + 1 day from now
+      startDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      endDate: new Date(Date.now() + 8 * 24 * 60 * 60 * 1000),
       status: "UPCOMING",
       participations: {
         create: seededPlayers.slice(0, 4).map((player, idx) => ({
@@ -102,141 +155,114 @@ const main = async () => {
     },
   });
 
-  // Tournament 2: COMPLETED with 8 participants and full bracket
-  // Benjamin wins the tournament!
-  const completedTournament = await prisma.tournament.create({
+  // Tournament 2: COMPLETED 8-player (Spring Championship)
+  const spring8Tournament = await prisma.tournament.create({
     data: {
       name: "Spring Championship",
       location: "Bola En Mano Bar",
       description: "Eight player single elimination championship.",
-      startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 1 week ago
-      endDate: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000), // 6 days ago
+      startDate: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000),
+      endDate: new Date(Date.now() - 13 * 24 * 60 * 60 * 1000),
       status: "COMPLETED",
       participations: {
         create: [
-          // Benjamin: 3 wins, 0 losses (CHAMPION)
           { userId: benjamin.id, seed: 3, wins: 3, losses: 0 },
-          // Elena: 2 wins, 1 loss (Runner-up - lost to Benjamin in final)
           { userId: elena.id, seed: 7, wins: 2, losses: 1 },
-          // Nikoto: 1 win, 1 loss (Semi-finalist - lost to Benjamin)
           { userId: nikoto.id, seed: 2, wins: 1, losses: 1 },
-          // Carlos: 1 win, 1 loss (Semi-finalist - lost to Elena)
           { userId: carlos.id, seed: 6, wins: 1, losses: 1 },
-          // Daniela: 0 wins, 1 loss (Quarter-finalist - lost to Nikoto)
           { userId: daniela.id, seed: 1, wins: 0, losses: 1 },
-          // Antoine: 0 wins, 1 loss (Quarter-finalist - lost to Benjamin)
           { userId: antoine.id, seed: 4, wins: 0, losses: 1 },
-          // Maria: 0 wins, 1 loss (Quarter-finalist - lost to Carlos)
           { userId: maria.id, seed: 5, wins: 0, losses: 1 },
-          // Miguel: 0 wins, 1 loss (Quarter-finalist - lost to Elena)
           { userId: miguel.id, seed: 8, wins: 0, losses: 1 },
         ],
       },
     },
   });
 
-  // Create matches in order (must be created in round order for bracket display)
-  const baseDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000); // Start 1 week ago
+  // Spring 8-player matches
+  const springBase = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
+  
+  // QF
+  await prisma.match.create({ data: { tournamentId: spring8Tournament.id, playerAId: daniela.id, playerBId: nikoto.id, winnerId: nikoto.id, tableNumber: 1, scheduledAt: springBase, completedAt: new Date(springBase.getTime() + 30 * 60000) } });
+  await prisma.match.create({ data: { tournamentId: spring8Tournament.id, playerAId: benjamin.id, playerBId: antoine.id, winnerId: benjamin.id, tableNumber: 2, scheduledAt: springBase, completedAt: new Date(springBase.getTime() + 25 * 60000) } });
+  await prisma.match.create({ data: { tournamentId: spring8Tournament.id, playerAId: maria.id, playerBId: carlos.id, winnerId: carlos.id, tableNumber: 3, scheduledAt: springBase, completedAt: new Date(springBase.getTime() + 40 * 60000) } });
+  await prisma.match.create({ data: { tournamentId: spring8Tournament.id, playerAId: elena.id, playerBId: miguel.id, winnerId: elena.id, tableNumber: 4, scheduledAt: springBase, completedAt: new Date(springBase.getTime() + 35 * 60000) } });
+  // SF
+  await prisma.match.create({ data: { tournamentId: spring8Tournament.id, playerAId: nikoto.id, playerBId: benjamin.id, winnerId: benjamin.id, tableNumber: 1, scheduledAt: new Date(springBase.getTime() + 60 * 60000), completedAt: new Date(springBase.getTime() + 90 * 60000) } });
+  await prisma.match.create({ data: { tournamentId: spring8Tournament.id, playerAId: carlos.id, playerBId: elena.id, winnerId: elena.id, tableNumber: 2, scheduledAt: new Date(springBase.getTime() + 60 * 60000), completedAt: new Date(springBase.getTime() + 100 * 60000) } });
+  // Final
+  await prisma.match.create({ data: { tournamentId: spring8Tournament.id, playerAId: benjamin.id, playerBId: elena.id, winnerId: benjamin.id, tableNumber: 1, scheduledAt: new Date(springBase.getTime() + 120 * 60000), completedAt: new Date(springBase.getTime() + 150 * 60000) } });
 
-  // Quarter-Finals (Round 1) - 4 matches
-  // Match 1: Daniela vs Nikoto → Nikoto wins
-  await prisma.match.create({
+  // Tournament 3: COMPLETED 16-player (Summer Championship)
+  // Benjamin wins again!
+  const summer16Tournament = await prisma.tournament.create({
     data: {
-      tournamentId: completedTournament.id,
-      playerAId: daniela.id,
-      playerBId: nikoto.id,
-      winnerId: nikoto.id,
-      tableNumber: 1,
-      scheduledAt: new Date(baseDate.getTime()),
-      completedAt: new Date(baseDate.getTime() + 30 * 60 * 1000), // 30 min later
+      name: "Summer Championship",
+      location: "Bola En Mano Bar",
+      description: "Sixteen player single elimination championship - the biggest tournament of the year!",
+      startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+      endDate: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
+      status: "COMPLETED",
+      participations: {
+        create: [
+          // Champion: Benjamin (4 wins)
+          { userId: benjamin.id, seed: 3, wins: 4, losses: 0 },
+          // Runner-up: Camila (3 wins, lost final)
+          { userId: camila.id, seed: 15, wins: 3, losses: 1 },
+          // Semi-finalists (2 wins each)
+          { userId: elena.id, seed: 7, wins: 2, losses: 1 },
+          { userId: lucas.id, seed: 12, wins: 2, losses: 1 },
+          // Quarter-finalists (1 win each)
+          { userId: nikoto.id, seed: 2, wins: 1, losses: 1 },
+          { userId: carlos.id, seed: 6, wins: 1, losses: 1 },
+          { userId: sofia.id, seed: 9, wins: 1, losses: 1 },
+          { userId: mateo.id, seed: 14, wins: 1, losses: 1 },
+          // Round of 16 losers (0 wins)
+          { userId: daniela.id, seed: 1, wins: 0, losses: 1 },
+          { userId: antoine.id, seed: 4, wins: 0, losses: 1 },
+          { userId: maria.id, seed: 5, wins: 0, losses: 1 },
+          { userId: miguel.id, seed: 8, wins: 0, losses: 1 },
+          { userId: diego.id, seed: 10, wins: 0, losses: 1 },
+          { userId: isabella.id, seed: 11, wins: 0, losses: 1 },
+          { userId: valentina.id, seed: 13, wins: 0, losses: 1 },
+          { userId: andres.id, seed: 16, wins: 0, losses: 1 },
+        ],
+      },
     },
   });
 
-  // Match 2: Benjamin vs Antoine → Benjamin wins
-  await prisma.match.create({
-    data: {
-      tournamentId: completedTournament.id,
-      playerAId: benjamin.id,
-      playerBId: antoine.id,
-      winnerId: benjamin.id,
-      tableNumber: 2,
-      scheduledAt: new Date(baseDate.getTime()),
-      completedAt: new Date(baseDate.getTime() + 25 * 60 * 1000), // 25 min later
-    },
-  });
+  // 16-player bracket matches (must be created in round order!)
+  const summerBase = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
-  // Match 3: Maria vs Carlos → Carlos wins
-  await prisma.match.create({
-    data: {
-      tournamentId: completedTournament.id,
-      playerAId: maria.id,
-      playerBId: carlos.id,
-      winnerId: carlos.id,
-      tableNumber: 3,
-      scheduledAt: new Date(baseDate.getTime()),
-      completedAt: new Date(baseDate.getTime() + 40 * 60 * 1000), // 40 min later
-    },
-  });
+  // Round of 16 (8 matches)
+  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: daniela.id, playerBId: nikoto.id, winnerId: nikoto.id, tableNumber: 1, scheduledAt: summerBase, completedAt: new Date(summerBase.getTime() + 25 * 60000) } });
+  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: benjamin.id, playerBId: antoine.id, winnerId: benjamin.id, tableNumber: 2, scheduledAt: summerBase, completedAt: new Date(summerBase.getTime() + 20 * 60000) } });
+  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: maria.id, playerBId: carlos.id, winnerId: carlos.id, tableNumber: 3, scheduledAt: summerBase, completedAt: new Date(summerBase.getTime() + 30 * 60000) } });
+  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: elena.id, playerBId: miguel.id, winnerId: elena.id, tableNumber: 4, scheduledAt: summerBase, completedAt: new Date(summerBase.getTime() + 22 * 60000) } });
+  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: sofia.id, playerBId: diego.id, winnerId: sofia.id, tableNumber: 5, scheduledAt: summerBase, completedAt: new Date(summerBase.getTime() + 28 * 60000) } });
+  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: isabella.id, playerBId: lucas.id, winnerId: lucas.id, tableNumber: 6, scheduledAt: summerBase, completedAt: new Date(summerBase.getTime() + 35 * 60000) } });
+  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: valentina.id, playerBId: mateo.id, winnerId: mateo.id, tableNumber: 7, scheduledAt: summerBase, completedAt: new Date(summerBase.getTime() + 27 * 60000) } });
+  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: camila.id, playerBId: andres.id, winnerId: camila.id, tableNumber: 8, scheduledAt: summerBase, completedAt: new Date(summerBase.getTime() + 18 * 60000) } });
 
-  // Match 4: Elena vs Miguel → Elena wins
-  await prisma.match.create({
-    data: {
-      tournamentId: completedTournament.id,
-      playerAId: elena.id,
-      playerBId: miguel.id,
-      winnerId: elena.id,
-      tableNumber: 4,
-      scheduledAt: new Date(baseDate.getTime()),
-      completedAt: new Date(baseDate.getTime() + 35 * 60 * 1000), // 35 min later
-    },
-  });
+  // Quarter-Finals (4 matches)
+  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: nikoto.id, playerBId: benjamin.id, winnerId: benjamin.id, tableNumber: 1, scheduledAt: new Date(summerBase.getTime() + 60 * 60000), completedAt: new Date(summerBase.getTime() + 85 * 60000) } });
+  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: carlos.id, playerBId: elena.id, winnerId: elena.id, tableNumber: 2, scheduledAt: new Date(summerBase.getTime() + 60 * 60000), completedAt: new Date(summerBase.getTime() + 90 * 60000) } });
+  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: sofia.id, playerBId: lucas.id, winnerId: lucas.id, tableNumber: 3, scheduledAt: new Date(summerBase.getTime() + 60 * 60000), completedAt: new Date(summerBase.getTime() + 95 * 60000) } });
+  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: mateo.id, playerBId: camila.id, winnerId: camila.id, tableNumber: 4, scheduledAt: new Date(summerBase.getTime() + 60 * 60000), completedAt: new Date(summerBase.getTime() + 80 * 60000) } });
 
-  // Semi-Finals (Round 2) - 2 matches
-  // Match 5: Nikoto vs Benjamin → Benjamin wins
-  await prisma.match.create({
-    data: {
-      tournamentId: completedTournament.id,
-      playerAId: nikoto.id,
-      playerBId: benjamin.id,
-      winnerId: benjamin.id,
-      tableNumber: 1,
-      scheduledAt: new Date(baseDate.getTime() + 60 * 60 * 1000), // 1 hour later
-      completedAt: new Date(baseDate.getTime() + 90 * 60 * 1000), // 1.5 hours later
-    },
-  });
+  // Semi-Finals (2 matches)
+  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: benjamin.id, playerBId: elena.id, winnerId: benjamin.id, tableNumber: 1, scheduledAt: new Date(summerBase.getTime() + 120 * 60000), completedAt: new Date(summerBase.getTime() + 150 * 60000) } });
+  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: lucas.id, playerBId: camila.id, winnerId: camila.id, tableNumber: 2, scheduledAt: new Date(summerBase.getTime() + 120 * 60000), completedAt: new Date(summerBase.getTime() + 155 * 60000) } });
 
-  // Match 6: Carlos vs Elena → Elena wins
-  await prisma.match.create({
-    data: {
-      tournamentId: completedTournament.id,
-      playerAId: carlos.id,
-      playerBId: elena.id,
-      winnerId: elena.id,
-      tableNumber: 2,
-      scheduledAt: new Date(baseDate.getTime() + 60 * 60 * 1000), // 1 hour later
-      completedAt: new Date(baseDate.getTime() + 100 * 60 * 1000), // 1h40min later
-    },
-  });
-
-  // Final (Round 3) - 1 match
-  // Match 7: Benjamin vs Elena → Benjamin wins (CHAMPION!)
-  await prisma.match.create({
-    data: {
-      tournamentId: completedTournament.id,
-      playerAId: benjamin.id,
-      playerBId: elena.id,
-      winnerId: benjamin.id,
-      tableNumber: 1,
-      scheduledAt: new Date(baseDate.getTime() + 120 * 60 * 1000), // 2 hours later
-      completedAt: new Date(baseDate.getTime() + 150 * 60 * 1000), // 2.5 hours later
-    },
-  });
+  // Final (1 match)
+  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: benjamin.id, playerBId: camila.id, winnerId: benjamin.id, tableNumber: 1, scheduledAt: new Date(summerBase.getTime() + 180 * 60000), completedAt: new Date(summerBase.getTime() + 220 * 60000) } });
 
   console.log("✅ Seed data created:");
-  console.log("   - 8 players");
+  console.log("   - 16 players");
   console.log("   - 1 upcoming tournament (Winter Open Doubles) with 4 participants");
-  console.log("   - 1 completed tournament (Spring Championship) with full bracket");
-  console.log("   - 🏆 Champion: Benjamin");
+  console.log("   - 1 completed 8-player tournament (Spring Championship)");
+  console.log("   - 1 completed 16-player tournament (Summer Championship)");
+  console.log("   - 🏆 Champion: Benjamin (won both completed tournaments!)");
 };
 
 main()
