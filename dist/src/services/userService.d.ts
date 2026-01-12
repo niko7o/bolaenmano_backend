@@ -118,6 +118,7 @@ export declare const getUserProfileWithMatches: (userId: string) => Promise<{
         playerAId: string;
         playerBId: string;
         winnerId: string | null;
+        roundNumber: number;
         tableNumber: number | null;
         scheduledAt: Date | null;
         completedAt: Date | null;

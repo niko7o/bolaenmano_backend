@@ -10,6 +10,7 @@ export type CreateMatchPayload = {
     playerBId: string;
     tableNumber?: number | null | undefined;
     scheduledAt?: string | null | undefined;
+    roundNumber?: number;
 };
 export type UpdateMatchPayload = {
     playerAId?: string;
@@ -64,6 +65,7 @@ export declare const listMatches: ({ tournamentId, scope }: ListMatchesFilters) 
     playerAId: string;
     playerBId: string;
     winnerId: string | null;
+    roundNumber: number;
     tableNumber: number | null;
     scheduledAt: Date | null;
     completedAt: Date | null;
@@ -114,6 +116,7 @@ export declare const getMatchById: (matchId: string) => Prisma.Prisma__MatchClie
     playerAId: string;
     playerBId: string;
     winnerId: string | null;
+    roundNumber: number;
     tableNumber: number | null;
     scheduledAt: Date | null;
     completedAt: Date | null;
@@ -164,12 +167,13 @@ export declare const createMatch: (payload: CreateMatchPayload) => Prisma.Prisma
     playerAId: string;
     playerBId: string;
     winnerId: string | null;
+    roundNumber: number;
     tableNumber: number | null;
     scheduledAt: Date | null;
     completedAt: Date | null;
     reminderSentAt: Date | null;
 }, never, import("@prisma/client/runtime/client").DefaultArgs, Prisma.PrismaClientOptions>;
-export declare const updateMatch: (matchId: string, payload: UpdateMatchPayload) => Prisma.Prisma__MatchClient<{
+export declare const updateMatch: (matchId: string, payload: UpdateMatchPayload) => Promise<{
     playerA: {
         id: string;
         email: string;
@@ -214,10 +218,11 @@ export declare const updateMatch: (matchId: string, payload: UpdateMatchPayload)
     playerAId: string;
     playerBId: string;
     winnerId: string | null;
+    roundNumber: number;
     tableNumber: number | null;
     scheduledAt: Date | null;
     completedAt: Date | null;
     reminderSentAt: Date | null;
-}, never, import("@prisma/client/runtime/client").DefaultArgs, Prisma.PrismaClientOptions>;
+}>;
 export {};
 //# sourceMappingURL=matchService.d.ts.map

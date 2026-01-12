@@ -34,6 +34,12 @@ export async function generateBracket(tournamentId: string) {
     throw new Error("Need at least 2 participants to generate a bracket");
   }
 
+  // Reset all participation stats for a fresh bracket
+  await prisma.participation.updateMany({
+    where: { tournamentId },
+    data: { wins: 0, losses: 0 },
+  });
+
   // Shuffle participants randomly
   const shuffled = [...participants].sort(() => Math.random() - 0.5);
 
@@ -78,6 +84,7 @@ export async function generateBracket(tournamentId: string) {
         tournamentId,
         playerAId: match.playerAId!,
         playerBId: match.playerBId,
+        roundNumber: 1,
       });
       createdMatches.push(created);
     } else if (match.playerAId) {
@@ -90,6 +97,7 @@ export async function generateBracket(tournamentId: string) {
         tournamentId,
         playerAId: match.playerAId,
         playerBId: match.playerAId, // Placeholder - represents a bye
+        roundNumber: 1,
       });
       // Mark playerA as winner immediately for bye
       const updated = await prisma.match.update({
@@ -130,9 +138,10 @@ export async function getBracketData(tournamentId: string) {
           playerB: true,
           winner: true,
         },
-        orderBy: {
-          createdAt: "asc",
-        },
+        orderBy: [
+          { roundNumber: "asc" },
+          { createdAt: "asc" },
+        ],
       },
       participations: {
         include: {
@@ -161,12 +170,13 @@ export async function getBracketData(tournamentId: string) {
   const nextPowerOf2 = Math.pow(2, Math.ceil(Math.log2(numParticipants)));
   const numRounds = Math.log2(nextPowerOf2);
 
-  // For now, we only create first round matches in generateBracket
-  // So we'll organize matches by creation order and group them logically
-  // First round matches are those created initially
-  const firstRoundMatchCount = Math.ceil(numParticipants / 2);
-  const firstRoundMatches = matches.slice(0, firstRoundMatchCount);
-  const subsequentMatches = matches.slice(firstRoundMatchCount);
+  // Group matches by roundNumber
+  const matchesByRound = new Map<number, typeof matches>();
+  for (const match of matches) {
+    const roundMatches = matchesByRound.get(match.roundNumber) || [];
+    roundMatches.push(match);
+    matchesByRound.set(match.roundNumber, roundMatches);
+  }
 
   // Organize matches by round
   const rounds: Array<{
@@ -175,36 +185,15 @@ export async function getBracketData(tournamentId: string) {
     matches: typeof matches;
   }> = [];
 
-  // First round
-  if (firstRoundMatches.length > 0) {
+  // Sort round numbers and create round objects
+  const sortedRoundNumbers = Array.from(matchesByRound.keys()).sort((a, b) => a - b);
+  for (const roundNum of sortedRoundNumbers) {
+    const roundMatches = matchesByRound.get(roundNum) || [];
     rounds.push({
-      roundNumber: 1,
-      roundName: getRoundName(1, numRounds),
-      matches: firstRoundMatches,
+      roundNumber: roundNum,
+      roundName: getRoundName(roundNum, numRounds),
+      matches: roundMatches,
     });
-  }
-
-  // Subsequent rounds (if any matches exist beyond first round)
-  // In a full bracket system, these would be created as winners advance
-  // For now, we'll show any additional matches as subsequent rounds
-  if (subsequentMatches.length > 0) {
-    let currentRound = 2;
-    let remainingMatches = [...subsequentMatches];
-    
-    while (remainingMatches.length > 0 && currentRound <= numRounds) {
-      const expectedMatchesInRound = Math.pow(2, numRounds - currentRound);
-      const matchesInRound = remainingMatches.slice(0, expectedMatchesInRound);
-      
-      if (matchesInRound.length > 0) {
-        rounds.push({
-          roundNumber: currentRound,
-          roundName: getRoundName(currentRound, numRounds),
-          matches: matchesInRound,
-        });
-        remainingMatches = remainingMatches.slice(expectedMatchesInRound);
-      }
-      currentRound++;
-    }
   }
 
   return {
@@ -212,6 +201,76 @@ export async function getBracketData(tournamentId: string) {
     numRounds,
     numParticipants,
   };
+}
+
+/**
+ * Advances the bracket by creating next round matches when current round is complete
+ * Returns the newly created matches, or empty array if round not complete
+ */
+export async function advanceBracket(tournamentId: string) {
+  // Get all matches for the tournament
+  const matches = await prisma.match.findMany({
+    where: { tournamentId },
+    include: {
+      playerA: true,
+      playerB: true,
+      winner: true,
+    },
+    orderBy: [
+      { roundNumber: "asc" },
+      { createdAt: "asc" },
+    ],
+  });
+
+  if (matches.length === 0) {
+    return [];
+  }
+
+  // Group matches by round
+  const matchesByRound = new Map<number, typeof matches>();
+  for (const match of matches) {
+    const roundMatches = matchesByRound.get(match.roundNumber) || [];
+    roundMatches.push(match);
+    matchesByRound.set(match.roundNumber, roundMatches);
+  }
+
+  // Find the highest round with matches
+  const highestRound = Math.max(...matchesByRound.keys());
+  const currentRoundMatches = matchesByRound.get(highestRound) || [];
+
+  // Check if all matches in the current round have winners
+  const allMatchesComplete = currentRoundMatches.every(match => match.winnerId !== null);
+  
+  if (!allMatchesComplete) {
+    return [];
+  }
+
+  // If only 1 match in current round and it's complete, tournament is finished
+  if (currentRoundMatches.length === 1) {
+    return [];
+  }
+
+  // Create next round matches by pairing winners
+  const nextRound = highestRound + 1;
+  const createdMatches = [];
+
+  // Pair winners: match 0 winner vs match 1 winner, match 2 winner vs match 3 winner, etc.
+  for (let i = 0; i < currentRoundMatches.length; i += 2) {
+    const match1 = currentRoundMatches[i];
+    const match2 = currentRoundMatches[i + 1];
+
+    if (match1?.winnerId && match2?.winnerId) {
+      const newMatch = await createMatch({
+        tournamentId,
+        playerAId: match1.winnerId,
+        playerBId: match2.winnerId,
+        roundNumber: nextRound,
+      });
+      createdMatches.push(newMatch);
+    }
+  }
+
+  return createdMatches;
 }
 
 function getRoundName(round: number, totalRounds: number): string {

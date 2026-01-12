@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "../lib/prisma";
+import { advanceBracket } from "./bracketService";
 
 type MatchScope = "upcoming" | "completed" | "all";
 
@@ -14,6 +15,7 @@ export type CreateMatchPayload = {
   playerBId: string;
   tableNumber?: number | null | undefined;
   scheduledAt?: string | null | undefined;
+  roundNumber?: number;
 };
 
 export type UpdateMatchPayload = {
@@ -87,11 +89,12 @@ export const createMatch = (payload: CreateMatchPayload) =>
       playerBId: payload.playerBId,
       tableNumber: payload.tableNumber ?? null,
       scheduledAt: toDate(payload.scheduledAt),
+      roundNumber: payload.roundNumber ?? 1,
     },
     include: matchInclude,
   });
 
-export const updateMatch = (matchId: string, payload: UpdateMatchPayload) => {
+export const updateMatch = async (matchId: string, payload: UpdateMatchPayload) => {
   const data: Prisma.MatchUpdateInput = {};
 
   if (payload.playerAId) {
@@ -129,11 +132,46 @@ export const updateMatch = (matchId: string, payload: UpdateMatchPayload) => {
         };
   }
 
-  return prisma.match.update({
+  const updatedMatch = await prisma.match.update({
     where: { id: matchId },
     data,
     include: matchInclude,
   });
+
+  // If a winner was set, update participation stats and advance bracket
+  if (payload.winnerId) {
+    // Skip stats update for bye matches (where playerA and playerB are the same)
+    const isByeMatch = updatedMatch.playerAId === updatedMatch.playerBId;
+    
+    if (!isByeMatch) {
+      const loserId = updatedMatch.playerAId === payload.winnerId 
+        ? updatedMatch.playerBId 
+        : updatedMatch.playerAId;
+      
+      // Increment winner's wins
+      await prisma.participation.updateMany({
+        where: { 
+          tournamentId: updatedMatch.tournamentId, 
+          userId: payload.winnerId 
+        },
+        data: { wins: { increment: 1 } }
+      });
+      
+      // Increment loser's losses
+      await prisma.participation.updateMany({
+        where: { 
+          tournamentId: updatedMatch.tournamentId, 
+          userId: loserId 
+        },
+        data: { losses: { increment: 1 } }
+      });
+    }
+
+    // Try to advance the bracket
+    await advanceBracket(updatedMatch.tournamentId);
+  }
+
+  return updatedMatch;
 };
 
 

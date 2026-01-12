@@ -44,6 +44,7 @@ export declare const getCurrentTournament: () => import(".prisma/client").Prisma
         playerAId: string;
         playerBId: string;
         winnerId: string | null;
+        roundNumber: number;
         tableNumber: number | null;
         scheduledAt: Date | null;
         completedAt: Date | null;
@@ -160,6 +161,7 @@ export declare const getTournamentById: (tournamentId: string) => import(".prism
         playerAId: string;
         playerBId: string;
         winnerId: string | null;
+        roundNumber: number;
         tableNumber: number | null;
         scheduledAt: Date | null;
         completedAt: Date | null;

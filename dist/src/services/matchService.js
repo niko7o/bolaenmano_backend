@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.updateMatch = exports.createMatch = exports.getMatchById = exports.listMatches = void 0;
 const prisma_1 = require("../lib/prisma");
+const bracketService_1 = require("./bracketService");
 const matchInclude = {
     playerA: true,
     playerB: true,
@@ -53,11 +54,12 @@ const createMatch = (payload) => prisma_1.prisma.match.create({
         playerBId: payload.playerBId,
         tableNumber: payload.tableNumber ?? null,
         scheduledAt: toDate(payload.scheduledAt),
+        roundNumber: payload.roundNumber ?? 1,
     },
     include: matchInclude,
 });
 exports.createMatch = createMatch;
-const updateMatch = (matchId, payload) => {
+const updateMatch = async (matchId, payload) => {
     const data = {};
     if (payload.playerAId) {
         data.playerA = {
@@ -88,11 +90,16 @@ const updateMatch = (matchId, payload) => {
                 disconnect: true,
             };
     }
-    return prisma_1.prisma.match.update({
+    const updatedMatch = await prisma_1.prisma.match.update({
         where: { id: matchId },
         data,
         include: matchInclude,
     });
+    // If a winner was set, try to advance the bracket
+    if (payload.winnerId) {
+        await (0, bracketService_1.advanceBracket)(updatedMatch.tournamentId);
+    }
+    return updatedMatch;
 };
 exports.updateMatch = updateMatch;
 //# sourceMappingURL=matchService.js.map

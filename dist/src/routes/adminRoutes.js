@@ -40,6 +40,7 @@ const zod_1 = require("zod");
 const auth_1 = require("../middleware/auth");
 const prisma_1 = require("../lib/prisma");
 const matchService_1 = require("../services/matchService");
+const bracketService_1 = require("../services/bracketService");
 const admin_1 = require("../lib/admin");
 const router = (0, express_1.Router)();
 const captureRouteException = (error, route, extra = {}) => {
@@ -327,6 +328,41 @@ router.delete("/matches/:matchId", async (req, res) => {
     catch (error) {
         console.error("Error deleting match:", error);
         return res.status(500).json({ message: "Failed to delete match" });
+    }
+});
+// ====== Bracket Generation ======
+router.delete("/tournaments/:tournamentId/matches", async (req, res) => {
+    const { tournamentId } = req.params;
+    try {
+        const deleted = await prisma_1.prisma.match.deleteMany({
+            where: { tournamentId },
+        });
+        return res.json({
+            message: "All matches deleted",
+            count: deleted.count
+        });
+    }
+    catch (error) {
+        console.error("Error deleting matches:", error);
+        captureRouteException(error, "admin:tournaments:matches:delete-all", {
+            tournamentId,
+        });
+        return res.status(500).json({ message: "Failed to delete matches" });
+    }
+});
+router.post("/tournaments/:tournamentId/generate-bracket", async (req, res) => {
+    const { tournamentId } = req.params;
+    try {
+        const result = await (0, bracketService_1.generateBracket)(tournamentId);
+        return res.json(result);
+    }
+    catch (error) {
+        console.error("Error generating bracket:", error);
+        captureRouteException(error, "admin:tournaments:generate-bracket", {
+            tournamentId,
+        });
+        const message = error instanceof Error ? error.message : "Failed to generate bracket";
+        return res.status(500).json({ message });
     }
 });
 // ====== Users ======

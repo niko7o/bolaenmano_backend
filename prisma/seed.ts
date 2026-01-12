@@ -179,19 +179,19 @@ const main = async () => {
     },
   });
 
-  // Spring 8-player matches
+  // Spring 8-player matches (8 players = 3 rounds: QF, SF, Final)
   const springBase = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
   
-  // QF
-  await prisma.match.create({ data: { tournamentId: spring8Tournament.id, playerAId: daniela.id, playerBId: nikoto.id, winnerId: nikoto.id, tableNumber: 1, scheduledAt: springBase, completedAt: new Date(springBase.getTime() + 30 * 60000) } });
-  await prisma.match.create({ data: { tournamentId: spring8Tournament.id, playerAId: benjamin.id, playerBId: antoine.id, winnerId: benjamin.id, tableNumber: 2, scheduledAt: springBase, completedAt: new Date(springBase.getTime() + 25 * 60000) } });
-  await prisma.match.create({ data: { tournamentId: spring8Tournament.id, playerAId: maria.id, playerBId: carlos.id, winnerId: carlos.id, tableNumber: 3, scheduledAt: springBase, completedAt: new Date(springBase.getTime() + 40 * 60000) } });
-  await prisma.match.create({ data: { tournamentId: spring8Tournament.id, playerAId: elena.id, playerBId: miguel.id, winnerId: elena.id, tableNumber: 4, scheduledAt: springBase, completedAt: new Date(springBase.getTime() + 35 * 60000) } });
-  // SF
-  await prisma.match.create({ data: { tournamentId: spring8Tournament.id, playerAId: nikoto.id, playerBId: benjamin.id, winnerId: benjamin.id, tableNumber: 1, scheduledAt: new Date(springBase.getTime() + 60 * 60000), completedAt: new Date(springBase.getTime() + 90 * 60000) } });
-  await prisma.match.create({ data: { tournamentId: spring8Tournament.id, playerAId: carlos.id, playerBId: elena.id, winnerId: elena.id, tableNumber: 2, scheduledAt: new Date(springBase.getTime() + 60 * 60000), completedAt: new Date(springBase.getTime() + 100 * 60000) } });
-  // Final
-  await prisma.match.create({ data: { tournamentId: spring8Tournament.id, playerAId: benjamin.id, playerBId: elena.id, winnerId: benjamin.id, tableNumber: 1, scheduledAt: new Date(springBase.getTime() + 120 * 60000), completedAt: new Date(springBase.getTime() + 150 * 60000) } });
+  // QF (Round 1)
+  await prisma.match.create({ data: { tournamentId: spring8Tournament.id, playerAId: daniela.id, playerBId: nikoto.id, winnerId: nikoto.id, roundNumber: 1, tableNumber: 1, scheduledAt: springBase, completedAt: new Date(springBase.getTime() + 30 * 60000) } });
+  await prisma.match.create({ data: { tournamentId: spring8Tournament.id, playerAId: benjamin.id, playerBId: antoine.id, winnerId: benjamin.id, roundNumber: 1, tableNumber: 2, scheduledAt: springBase, completedAt: new Date(springBase.getTime() + 25 * 60000) } });
+  await prisma.match.create({ data: { tournamentId: spring8Tournament.id, playerAId: maria.id, playerBId: carlos.id, winnerId: carlos.id, roundNumber: 1, tableNumber: 3, scheduledAt: springBase, completedAt: new Date(springBase.getTime() + 40 * 60000) } });
+  await prisma.match.create({ data: { tournamentId: spring8Tournament.id, playerAId: elena.id, playerBId: miguel.id, winnerId: elena.id, roundNumber: 1, tableNumber: 4, scheduledAt: springBase, completedAt: new Date(springBase.getTime() + 35 * 60000) } });
+  // SF (Round 2)
+  await prisma.match.create({ data: { tournamentId: spring8Tournament.id, playerAId: nikoto.id, playerBId: benjamin.id, winnerId: benjamin.id, roundNumber: 2, tableNumber: 1, scheduledAt: new Date(springBase.getTime() + 60 * 60000), completedAt: new Date(springBase.getTime() + 90 * 60000) } });
+  await prisma.match.create({ data: { tournamentId: spring8Tournament.id, playerAId: carlos.id, playerBId: elena.id, winnerId: elena.id, roundNumber: 2, tableNumber: 2, scheduledAt: new Date(springBase.getTime() + 60 * 60000), completedAt: new Date(springBase.getTime() + 100 * 60000) } });
+  // Final (Round 3)
+  await prisma.match.create({ data: { tournamentId: spring8Tournament.id, playerAId: benjamin.id, playerBId: elena.id, winnerId: benjamin.id, roundNumber: 3, tableNumber: 1, scheduledAt: new Date(springBase.getTime() + 120 * 60000), completedAt: new Date(springBase.getTime() + 150 * 60000) } });
 
   // Tournament 3: COMPLETED 16-player (Summer Championship)
   // Benjamin wins again!
@@ -231,31 +231,31 @@ const main = async () => {
     },
   });
 
-  // 16-player bracket matches (must be created in round order!)
+  // 16-player bracket matches (16 players = 4 rounds: R16, QF, SF, Final)
   const summerBase = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
-  // Round of 16 (8 matches)
-  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: daniela.id, playerBId: nikoto.id, winnerId: nikoto.id, tableNumber: 1, scheduledAt: summerBase, completedAt: new Date(summerBase.getTime() + 25 * 60000) } });
-  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: benjamin.id, playerBId: antoine.id, winnerId: benjamin.id, tableNumber: 2, scheduledAt: summerBase, completedAt: new Date(summerBase.getTime() + 20 * 60000) } });
-  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: maria.id, playerBId: carlos.id, winnerId: carlos.id, tableNumber: 3, scheduledAt: summerBase, completedAt: new Date(summerBase.getTime() + 30 * 60000) } });
-  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: elena.id, playerBId: miguel.id, winnerId: elena.id, tableNumber: 4, scheduledAt: summerBase, completedAt: new Date(summerBase.getTime() + 22 * 60000) } });
-  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: sofia.id, playerBId: diego.id, winnerId: sofia.id, tableNumber: 5, scheduledAt: summerBase, completedAt: new Date(summerBase.getTime() + 28 * 60000) } });
-  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: isabella.id, playerBId: lucas.id, winnerId: lucas.id, tableNumber: 6, scheduledAt: summerBase, completedAt: new Date(summerBase.getTime() + 35 * 60000) } });
-  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: valentina.id, playerBId: mateo.id, winnerId: mateo.id, tableNumber: 7, scheduledAt: summerBase, completedAt: new Date(summerBase.getTime() + 27 * 60000) } });
-  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: camila.id, playerBId: andres.id, winnerId: camila.id, tableNumber: 8, scheduledAt: summerBase, completedAt: new Date(summerBase.getTime() + 18 * 60000) } });
+  // Round of 16 (Round 1, 8 matches)
+  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: daniela.id, playerBId: nikoto.id, winnerId: nikoto.id, roundNumber: 1, tableNumber: 1, scheduledAt: summerBase, completedAt: new Date(summerBase.getTime() + 25 * 60000) } });
+  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: benjamin.id, playerBId: antoine.id, winnerId: benjamin.id, roundNumber: 1, tableNumber: 2, scheduledAt: summerBase, completedAt: new Date(summerBase.getTime() + 20 * 60000) } });
+  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: maria.id, playerBId: carlos.id, winnerId: carlos.id, roundNumber: 1, tableNumber: 3, scheduledAt: summerBase, completedAt: new Date(summerBase.getTime() + 30 * 60000) } });
+  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: elena.id, playerBId: miguel.id, winnerId: elena.id, roundNumber: 1, tableNumber: 4, scheduledAt: summerBase, completedAt: new Date(summerBase.getTime() + 22 * 60000) } });
+  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: sofia.id, playerBId: diego.id, winnerId: sofia.id, roundNumber: 1, tableNumber: 5, scheduledAt: summerBase, completedAt: new Date(summerBase.getTime() + 28 * 60000) } });
+  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: isabella.id, playerBId: lucas.id, winnerId: lucas.id, roundNumber: 1, tableNumber: 6, scheduledAt: summerBase, completedAt: new Date(summerBase.getTime() + 35 * 60000) } });
+  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: valentina.id, playerBId: mateo.id, winnerId: mateo.id, roundNumber: 1, tableNumber: 7, scheduledAt: summerBase, completedAt: new Date(summerBase.getTime() + 27 * 60000) } });
+  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: camila.id, playerBId: andres.id, winnerId: camila.id, roundNumber: 1, tableNumber: 8, scheduledAt: summerBase, completedAt: new Date(summerBase.getTime() + 18 * 60000) } });
 
-  // Quarter-Finals (4 matches)
-  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: nikoto.id, playerBId: benjamin.id, winnerId: benjamin.id, tableNumber: 1, scheduledAt: new Date(summerBase.getTime() + 60 * 60000), completedAt: new Date(summerBase.getTime() + 85 * 60000) } });
-  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: carlos.id, playerBId: elena.id, winnerId: elena.id, tableNumber: 2, scheduledAt: new Date(summerBase.getTime() + 60 * 60000), completedAt: new Date(summerBase.getTime() + 90 * 60000) } });
-  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: sofia.id, playerBId: lucas.id, winnerId: lucas.id, tableNumber: 3, scheduledAt: new Date(summerBase.getTime() + 60 * 60000), completedAt: new Date(summerBase.getTime() + 95 * 60000) } });
-  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: mateo.id, playerBId: camila.id, winnerId: camila.id, tableNumber: 4, scheduledAt: new Date(summerBase.getTime() + 60 * 60000), completedAt: new Date(summerBase.getTime() + 80 * 60000) } });
+  // Quarter-Finals (Round 2, 4 matches)
+  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: nikoto.id, playerBId: benjamin.id, winnerId: benjamin.id, roundNumber: 2, tableNumber: 1, scheduledAt: new Date(summerBase.getTime() + 60 * 60000), completedAt: new Date(summerBase.getTime() + 85 * 60000) } });
+  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: carlos.id, playerBId: elena.id, winnerId: elena.id, roundNumber: 2, tableNumber: 2, scheduledAt: new Date(summerBase.getTime() + 60 * 60000), completedAt: new Date(summerBase.getTime() + 90 * 60000) } });
+  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: sofia.id, playerBId: lucas.id, winnerId: lucas.id, roundNumber: 2, tableNumber: 3, scheduledAt: new Date(summerBase.getTime() + 60 * 60000), completedAt: new Date(summerBase.getTime() + 95 * 60000) } });
+  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: mateo.id, playerBId: camila.id, winnerId: camila.id, roundNumber: 2, tableNumber: 4, scheduledAt: new Date(summerBase.getTime() + 60 * 60000), completedAt: new Date(summerBase.getTime() + 80 * 60000) } });
 
-  // Semi-Finals (2 matches)
-  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: benjamin.id, playerBId: elena.id, winnerId: benjamin.id, tableNumber: 1, scheduledAt: new Date(summerBase.getTime() + 120 * 60000), completedAt: new Date(summerBase.getTime() + 150 * 60000) } });
-  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: lucas.id, playerBId: camila.id, winnerId: camila.id, tableNumber: 2, scheduledAt: new Date(summerBase.getTime() + 120 * 60000), completedAt: new Date(summerBase.getTime() + 155 * 60000) } });
+  // Semi-Finals (Round 3, 2 matches)
+  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: benjamin.id, playerBId: elena.id, winnerId: benjamin.id, roundNumber: 3, tableNumber: 1, scheduledAt: new Date(summerBase.getTime() + 120 * 60000), completedAt: new Date(summerBase.getTime() + 150 * 60000) } });
+  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: lucas.id, playerBId: camila.id, winnerId: camila.id, roundNumber: 3, tableNumber: 2, scheduledAt: new Date(summerBase.getTime() + 120 * 60000), completedAt: new Date(summerBase.getTime() + 155 * 60000) } });
 
-  // Final (1 match)
-  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: benjamin.id, playerBId: camila.id, winnerId: benjamin.id, tableNumber: 1, scheduledAt: new Date(summerBase.getTime() + 180 * 60000), completedAt: new Date(summerBase.getTime() + 220 * 60000) } });
+  // Final (Round 4, 1 match)
+  await prisma.match.create({ data: { tournamentId: summer16Tournament.id, playerAId: benjamin.id, playerBId: camila.id, winnerId: benjamin.id, roundNumber: 4, tableNumber: 1, scheduledAt: new Date(summerBase.getTime() + 180 * 60000), completedAt: new Date(summerBase.getTime() + 220 * 60000) } });
 
   console.log("✅ Seed data created:");
   console.log("   - 16 players");

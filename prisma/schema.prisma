@@ -47,6 +47,7 @@ model Match {
   playerBId     String
   winner        User?      @relation("MatchWinner", fields: [winnerId], references: [id])
   winnerId      String?
+  roundNumber   Int        @default(1)
   tableNumber   Int?
   scheduledAt   DateTime?
   completedAt   DateTime?
