@@ -2,6 +2,8 @@ import { Router } from "express";
 import { z } from "zod";
 import { getCurrentTournament, getTournamentById, getTournamentHistory } from "../services/tournamentService";
 import { getBracketData } from "../services/bracketService";
+import { requireAuth, AuthedRequest } from "../middleware/auth";
+import { prisma } from "../lib/prisma";
 
 const router = Router();
 
@@ -85,6 +87,133 @@ router.get("/:tournamentId/bracket", async (req, res) => {
     const message = error instanceof Error ? error.message : "Failed to fetch bracket";
     return res.status(500).json({ 
       message, 
+      error: error instanceof Error ? error.message : "Unknown error" 
+    });
+  }
+});
+
+// Join a tournament (authenticated)
+router.post("/:tournamentId/join", requireAuth, async (req: AuthedRequest, res) => {
+  try {
+    const parsed = paramsSchema.safeParse(req.params);
+
+    if (!parsed.success) {
+      return res.status(400).json({ message: "Invalid tournament id" });
+    }
+
+    const { tournamentId } = parsed.data;
+    const userId = req.userId!;
+
+    // Get tournament
+    const tournament = await prisma.tournament.findUnique({
+      where: { id: tournamentId },
+    });
+
+    if (!tournament) {
+      return res.status(404).json({ message: "Tournament not found" });
+    }
+
+    // Only allow joining UPCOMING tournaments
+    if (tournament.status !== "UPCOMING") {
+      return res.status(400).json({ 
+        message: "Can only join upcoming tournaments" 
+      });
+    }
+
+    // Check if already participating
+    const existingParticipation = await prisma.participation.findFirst({
+      where: {
+        tournamentId,
+        userId,
+      },
+    });
+
+    if (existingParticipation) {
+      return res.status(400).json({ 
+        message: "Already participating in this tournament" 
+      });
+    }
+
+    // Create participation
+    const participation = await prisma.participation.create({
+      data: {
+        tournamentId,
+        userId,
+        wins: 0,
+        losses: 0,
+      },
+      include: {
+        user: true,
+        tournament: true,
+      },
+    });
+
+    console.log(`[/tournaments/${tournamentId}/join] User ${userId} joined tournament`);
+    return res.status(201).json(participation);
+  } catch (error) {
+    console.error("[/tournaments/:id/join] Error:", error);
+    return res.status(500).json({ 
+      message: "Failed to join tournament",
+      error: error instanceof Error ? error.message : "Unknown error" 
+    });
+  }
+});
+
+// Leave a tournament (authenticated)
+router.delete("/:tournamentId/leave", requireAuth, async (req: AuthedRequest, res) => {
+  try {
+    const parsed = paramsSchema.safeParse(req.params);
+
+    if (!parsed.success) {
+      return res.status(400).json({ message: "Invalid tournament id" });
+    }
+
+    const { tournamentId } = parsed.data;
+    const userId = req.userId!;
+
+    // Get tournament
+    const tournament = await prisma.tournament.findUnique({
+      where: { id: tournamentId },
+    });
+
+    if (!tournament) {
+      return res.status(404).json({ message: "Tournament not found" });
+    }
+
+    // Only allow leaving UPCOMING tournaments
+    if (tournament.status !== "UPCOMING") {
+      return res.status(400).json({ 
+        message: "Can only leave upcoming tournaments" 
+      });
+    }
+
+    // Check if participating
+    const existingParticipation = await prisma.participation.findFirst({
+      where: {
+        tournamentId,
+        userId,
+      },
+    });
+
+    if (!existingParticipation) {
+      return res.status(400).json({ 
+        message: "Not participating in this tournament" 
+      });
+    }
+
+    // Delete participation
+    await prisma.participation.delete({
+      where: {
+        id: existingParticipation.id,
+      },
+    });
+
+    console.log(`[/tournaments/${tournamentId}/leave] User ${userId} left tournament`);
+    return res.status(200).json({ message: "Successfully left tournament" });
+  } catch (error) {
+    console.error("[/tournaments/:id/leave] Error:", error);
+    return res.status(500).json({ 
+      message: "Failed to leave tournament",
       error: error instanceof Error ? error.message : "Unknown error" 
     });
   }
