@@ -306,9 +306,15 @@ router.patch("/matches/:matchId", async (req, res) => {
 
   try {
     const match = await updateMatch(matchId, {
-      ...parsed.data,
-      scheduledAt: parsed.data.scheduledAt?.toISOString() ?? null,
-      completedAt: parsed.data.completedAt?.toISOString() ?? null,
+      winnerId: parsed.data.winnerId,
+      tableNumber: parsed.data.tableNumber,
+      // Only include scheduledAt/completedAt if they were explicitly provided
+      ...(parsed.data.scheduledAt !== undefined && {
+        scheduledAt: parsed.data.scheduledAt?.toISOString() ?? null,
+      }),
+      ...(parsed.data.completedAt !== undefined && {
+        completedAt: parsed.data.completedAt?.toISOString() ?? null,
+      }),
     });
     return res.json(match);
   } catch (error) {
