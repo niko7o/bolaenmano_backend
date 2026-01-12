@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import { getCurrentTournament, getTournamentById, getTournamentHistory } from "../services/tournamentService";
+import { getBracketData } from "../services/bracketService";
 
 const router = Router();
 
@@ -64,6 +65,26 @@ router.get("/:tournamentId", async (req, res) => {
     console.error("[/tournaments/:id] Error stack:", error instanceof Error ? error.stack : "No stack trace");
     return res.status(500).json({ 
       message: "Failed to fetch tournament", 
+      error: error instanceof Error ? error.message : "Unknown error" 
+    });
+  }
+});
+
+router.get("/:tournamentId/bracket", async (req, res) => {
+  try {
+    const parsed = paramsSchema.safeParse(req.params);
+
+    if (!parsed.success) {
+      return res.status(400).json({ message: "Invalid tournament id" });
+    }
+
+    const bracket = await getBracketData(parsed.data.tournamentId);
+    return res.json(bracket);
+  } catch (error) {
+    console.error("[/tournaments/:id/bracket] Error:", error);
+    const message = error instanceof Error ? error.message : "Failed to fetch bracket";
+    return res.status(500).json({ 
+      message, 
       error: error instanceof Error ? error.message : "Unknown error" 
     });
   }

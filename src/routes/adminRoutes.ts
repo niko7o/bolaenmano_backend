@@ -4,6 +4,7 @@ import { z } from "zod";
 import { requireAuth, requireAdmin } from "../middleware/auth";
 import { prisma } from "../lib/prisma";
 import { createMatch, updateMatch } from "../services/matchService";
+import { generateBracket } from "../services/bracketService";
 import { isAdminEmail } from "../lib/admin";
 
 const router = Router();
@@ -328,6 +329,45 @@ router.delete("/matches/:matchId", async (req, res) => {
   } catch (error) {
     console.error("Error deleting match:", error);
     return res.status(500).json({ message: "Failed to delete match" });
+  }
+});
+
+// ====== Bracket Generation ======
+
+router.delete("/tournaments/:tournamentId/matches", async (req, res) => {
+  const { tournamentId } = req.params;
+
+  try {
+    const deleted = await prisma.match.deleteMany({
+      where: { tournamentId },
+    });
+
+    return res.json({ 
+      message: "All matches deleted", 
+      count: deleted.count 
+    });
+  } catch (error) {
+    console.error("Error deleting matches:", error);
+    captureRouteException(error, "admin:tournaments:matches:delete-all", {
+      tournamentId,
+    });
+    return res.status(500).json({ message: "Failed to delete matches" });
+  }
+});
+
+router.post("/tournaments/:tournamentId/generate-bracket", async (req, res) => {
+  const { tournamentId } = req.params;
+
+  try {
+    const result = await generateBracket(tournamentId);
+    return res.json(result);
+  } catch (error) {
+    console.error("Error generating bracket:", error);
+    captureRouteException(error, "admin:tournaments:generate-bracket", {
+      tournamentId,
+    });
+    const message = error instanceof Error ? error.message : "Failed to generate bracket";
+    return res.status(500).json({ message });
   }
 });
 

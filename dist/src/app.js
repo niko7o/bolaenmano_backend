@@ -40,22 +40,14 @@ exports.buildApp = void 0;
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const env_1 = require("./config/env");
+const Sentry = __importStar(require("@sentry/node"));
 const authRoutes_1 = require("./routes/authRoutes");
 const tournamentRoutes_1 = require("./routes/tournamentRoutes");
 const userRoutes_1 = require("./routes/userRoutes");
 const matchRoutes_1 = require("./routes/matchRoutes");
 const adminRoutes_1 = require("./routes/adminRoutes");
-const Sentry = __importStar(require("@sentry/node"));
 const buildApp = () => {
     const app = (0, express_1.default)();
-    Sentry.init({
-        dsn: env_1.env.SENTRY_DSN ?? "",
-        enabled: Boolean(env_1.env.SENTRY_DSN),
-        enableLogs: true,
-        sendDefaultPii: true,
-        tracesSampleRate: env_1.env.SENTRY_TRACES_SAMPLE_RATE,
-        integrations: [Sentry.expressIntegration()],
-    });
     app.use((0, cors_1.default)({
         origin: "*",
         credentials: true,
