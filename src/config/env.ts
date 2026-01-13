@@ -9,6 +9,8 @@ const envSchema = z.object({
   GOOGLE_CLIENT_ID: z.string().min(1),
   GOOGLE_CLIENT_SECRET: z.string().min(1),
   GOOGLE_IOS_CLIENT_ID: z.string(), // iOS OAuth Client ID
+  GOOGLE_DESKTOP_CLIENT_ID: z.string().optional(), // Desktop OAuth Client ID
+  GOOGLE_DESKTOP_CLIENT_SECRET: z.string().optional(), // Desktop OAuth Client Secret (optional, falls back to GOOGLE_CLIENT_SECRET)
   JWT_SECRET: z.string().min(10),
   ADMIN_USERS: z.string().default(""),
   SENTRY_DSN: z.string().optional(),

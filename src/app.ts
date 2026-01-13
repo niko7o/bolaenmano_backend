@@ -2,12 +2,22 @@ import express from "express";
 import cors from "cors";
 import { env } from "./config/env";
 import * as Sentry from "@sentry/node";
+import { readFileSync, existsSync } from "fs";
+import { join } from "path";
 
 import { authRoutes } from "./routes/authRoutes";
 import { tournamentRoutes } from "./routes/tournamentRoutes";
 import { userRoutes } from "./routes/userRoutes";
 import { matchRoutes } from "./routes/matchRoutes";
 import { adminRoutes } from "./routes/adminRoutes";
+
+const findPackageJson = (): string => {
+  const fromSrc = join(__dirname, "../package.json");
+  if (existsSync(fromSrc)) return fromSrc;
+  return join(__dirname, "../../package.json");
+};
+
+const packageJson = JSON.parse(readFileSync(findPackageJson(), "utf-8"));
 
 export const buildApp = () => {
   const app = express();
@@ -21,6 +31,8 @@ export const buildApp = () => {
   app.use(express.json());
 
   app.get("/health", (_req, res) => res.json({ status: "ok", timestamp: new Date().toISOString() }));
+
+  app.get("/version", (_req, res) => res.json({ version: packageJson.version }));
   
   app.get("/debug-sentry", function mainHandler(req, res) {
     Sentry.logger.info('User triggered test error', { action: 'test_error_endpoint' });

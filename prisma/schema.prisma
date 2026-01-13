@@ -13,7 +13,7 @@ model User {
   displayName      String
   avatarUrl        String?
   expoPushToken    String?   @unique
-  currentWinStreak Int       @default(0)
+  winstreak Int       @default(0)
   currentLossStreak Int      @default(0)
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
