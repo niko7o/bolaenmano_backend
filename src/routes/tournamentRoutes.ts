@@ -92,7 +92,6 @@ router.get("/:tournamentId/bracket", async (req, res) => {
   }
 });
 
-// Join a tournament (authenticated)
 router.post("/:tournamentId/join", requireAuth, async (req: AuthedRequest, res) => {
   try {
     const parsed = paramsSchema.safeParse(req.params);
@@ -104,7 +103,6 @@ router.post("/:tournamentId/join", requireAuth, async (req: AuthedRequest, res) 
     const { tournamentId } = parsed.data;
     const userId = req.userId!;
 
-    // Get tournament
     const tournament = await prisma.tournament.findUnique({
       where: { id: tournamentId },
     });
@@ -113,14 +111,12 @@ router.post("/:tournamentId/join", requireAuth, async (req: AuthedRequest, res) 
       return res.status(404).json({ message: "Tournament not found" });
     }
 
-    // Only allow joining UPCOMING tournaments
     if (tournament.status !== "UPCOMING") {
       return res.status(400).json({ 
         message: "Can only join upcoming tournaments" 
       });
     }
 
-    // Check if already participating
     const existingParticipation = await prisma.participation.findFirst({
       where: {
         tournamentId,
@@ -134,7 +130,6 @@ router.post("/:tournamentId/join", requireAuth, async (req: AuthedRequest, res) 
       });
     }
 
-    // Create participation
     const participation = await prisma.participation.create({
       data: {
         tournamentId,
@@ -159,7 +154,6 @@ router.post("/:tournamentId/join", requireAuth, async (req: AuthedRequest, res) 
   }
 });
 
-// Leave a tournament (authenticated)
 router.delete("/:tournamentId/leave", requireAuth, async (req: AuthedRequest, res) => {
   try {
     const parsed = paramsSchema.safeParse(req.params);
@@ -171,7 +165,6 @@ router.delete("/:tournamentId/leave", requireAuth, async (req: AuthedRequest, re
     const { tournamentId } = parsed.data;
     const userId = req.userId!;
 
-    // Get tournament
     const tournament = await prisma.tournament.findUnique({
       where: { id: tournamentId },
     });
@@ -180,14 +173,12 @@ router.delete("/:tournamentId/leave", requireAuth, async (req: AuthedRequest, re
       return res.status(404).json({ message: "Tournament not found" });
     }
 
-    // Only allow leaving UPCOMING tournaments
     if (tournament.status !== "UPCOMING") {
       return res.status(400).json({ 
         message: "Can only leave upcoming tournaments" 
       });
     }
 
-    // Check if participating
     const existingParticipation = await prisma.participation.findFirst({
       where: {
         tournamentId,
@@ -201,7 +192,6 @@ router.delete("/:tournamentId/leave", requireAuth, async (req: AuthedRequest, re
       });
     }
 
-    // Delete participation
     await prisma.participation.delete({
       where: {
         id: existingParticipation.id,
