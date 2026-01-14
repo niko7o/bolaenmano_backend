@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { generateBracket, getBracketData, advanceBracket } from "../bracketService";
+import { generateBracket, getBracketData, advanceBracket, sayHello } from "../bracketService";
 import { createTournamentWithParticipants, createTournament } from "../../test/fixtures";
 import { prisma } from "../../lib/prisma";
 
@@ -388,6 +388,13 @@ describe("Bracket Service", () => {
       });
       newMatches = await advanceBracket(tournament.id);
       expect(newMatches).toHaveLength(0);
+    });
+  });
+
+  describe("sayHello", () => {
+    it("should return 'Hello World'", async () => {
+      const result = await sayHello();
+      expect(result).toBe("Hello World");
     });
   });
 });
