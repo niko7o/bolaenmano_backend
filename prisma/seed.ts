@@ -17,7 +17,6 @@ const prisma = new PrismaClient({
 });
 
 const players = [
-  // Original 8 players
   {
     googleId: "demo-google-id-1",
     email: "daniela@gmail.com",
@@ -66,7 +65,6 @@ const players = [
     displayName: "Miguel Torres",
     avatarUrl: "https://i.pravatar.cc/150?img=11",
   },
-  // New 8 players for 16-player tournament
   {
     googleId: "demo-google-id-9",
     email: "sofia@gmail.com",
@@ -115,6 +113,48 @@ const players = [
     displayName: "Andres Ruiz",
     avatarUrl: "https://i.pravatar.cc/150?img=53",
   },
+  {
+    googleId: "demo-google-id-17",
+    email: "juan@gmail.com",
+    displayName: "Juan Perez",
+    avatarUrl: "https://i.pravatar.cc/150?img=54",
+  },
+  {
+    googleId: "demo-google-id-18",
+    email: "pedro@gmail.com",
+    displayName: "Pedro Gomez",
+    avatarUrl: "https://i.pravatar.cc/150?img=55",
+  },
+  {
+    googleId: "demo-google-id-19",
+    email: "luis@gmail.com",
+    displayName: "Luis Rodriguez",
+    avatarUrl: "https://i.pravatar.cc/150?img=56",
+  },
+  {
+    googleId: "demo-google-id-20",
+    email: "roberto@gmail.com",
+    displayName: "Roberto Martinez",
+    avatarUrl: "https://i.pravatar.cc/150?img=57",
+  },
+  {
+    googleId: "demo-google-id-21",
+    email: "carlos@gmail.com",
+    displayName: "Carlos Rodriguez",
+    avatarUrl: "https://i.pravatar.cc/150?img=58",
+  },
+  {
+    googleId: "demo-google-id-22",
+    email: "jose@gmail.com",
+    displayName: "Jose Lopez",
+    avatarUrl: "https://i.pravatar.cc/150?img=59",
+  },
+  {
+    googleId: "demo-google-id-23",
+    email: "manuel@gmail.com",
+    displayName: "Manuel Hernandez",
+    avatarUrl: "https://i.pravatar.cc/150?img=60",
+  },
 ];
 
 const main = async () => {
@@ -129,10 +169,23 @@ const main = async () => {
     seededPlayers.push(await prisma.user.create({ data: player }));
   }
 
-  // Get player references for easier access
   const [
-    daniela, david, benjamin, antoine, maria, carlos, elena, miguel,
-    sofia, diego, isabella, lucas, valentina, mateo, camila, andres
+    daniela,
+    david, 
+    benjamin, 
+    antoine, 
+    maria, 
+    carlos, 
+    elena, 
+    miguel,
+    sofia, 
+    diego, 
+    isabella, 
+    lucas, 
+    valentina, 
+    mateo, 
+    camila, 
+    andres
   ] = seededPlayers;
 
   // TypeScript non-null assertions since we know we have exactly 16 players
@@ -200,7 +253,6 @@ const main = async () => {
   await prisma.match.create({ data: { tournamentId: spring8Tournament.id, playerAId: benjamin?.id || 'cccc', playerBId: elena?.id || 'gggg', winnerId: benjamin?.id || 'cccc', roundNumber: 3, tableNumber: 1, scheduledAt: new Date(springBase.getTime() + 120 * 60000), completedAt: new Date(springBase.getTime() + 150 * 60000) } });
 
   // Tournament 3: COMPLETED 16-player (Summer Championship)
-  // Benjamin wins again!
   const summer16Tournament = await prisma.tournament.create({
     data: {
       name: "Summer Championship",
@@ -211,19 +263,14 @@ const main = async () => {
       status: "COMPLETED",
       participations: {
         create: [
-          // Champion: Benjamin (4 wins)
           { userId: benjamin!.id, seed: 3, wins: 4, losses: 0 },
-          // Runner-up: Camila (3 wins, lost final)
           { userId: camila!.id, seed: 15, wins: 3, losses: 1 },
-          // Semi-finalists (2 wins each)
           { userId: elena!.id, seed: 7, wins: 2, losses: 1 },
           { userId: lucas!.id, seed: 12, wins: 2, losses: 1 },
-          // Quarter-finalists (1 win each)
           { userId: david!.id, seed: 2, wins: 1, losses: 1 },
           { userId: carlos!.id, seed: 6, wins: 1, losses: 1 },
           { userId: sofia!.id, seed: 9, wins: 1, losses: 1 },
           { userId: mateo!.id, seed: 14, wins: 1, losses: 1 },
-          // Round of 16 losers (0 wins)
           { userId: daniela!.id, seed: 1, wins: 0, losses: 1 },
           { userId: antoine!.id, seed: 4, wins: 0, losses: 1 },
           { userId: maria!.id, seed: 5, wins: 0, losses: 1 },
