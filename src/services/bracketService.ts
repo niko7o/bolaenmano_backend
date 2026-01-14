@@ -273,6 +273,10 @@ export async function advanceBracket(tournamentId: string) {
   return createdMatches;
 }
 
+export async function sayHello() {
+  return Promise.resolve("Hello World");
+}
+
 function getRoundName(round: number, totalRounds: number): string {
   if (round === totalRounds) return "Final";
   if (round === totalRounds - 1) return "Semi-Finals";
